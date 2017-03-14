@@ -1,3 +1,4 @@
+import numpy as np
 import itertools
 from nltk import sent_tokenize
 from nltk import word_tokenize
@@ -47,3 +48,8 @@ for i, sentence in enumerate(tokenized_sentences):
     for j, word in enumerate(sentence):
         if (word not in word_to_index):
             tokenized_sentences[i][j] = unknown_token
+
+# list[:-1] => exclude the last item
+# list[1:] => exclude the first item
+X_train = np.asarray([[word_to_index[w] for w in sent[:-1]] for sent in tokenized_sentences])
+y_train = np.asarray([[word_to_index[w] for w in sent[1:]] for sent in tokenized_sentences])
