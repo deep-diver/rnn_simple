@@ -51,5 +51,14 @@ for i, sentence in enumerate(tokenized_sentences):
 
 # list[:-1] => exclude the last item
 # list[1:] => exclude the first item
-X_train = np.asarray([[word_to_index[w] for w in sent[:-1]] for sent in tokenized_sentences])
-y_train = np.asarray([[word_to_index[w] for w in sent[1:]] for sent in tokenized_sentences])
+x_train = np.asarray([[word_to_index[w] for w in sent[:-1]] for sent in tokenized_sentences])
+y_label = np.asarray([[word_to_index[w] for w in sent[1:]] for sent in tokenized_sentences])
+
+# 1 sample training and label
+print("x: ")
+print(tokenized_sentences[10][:-1])
+print(x_train[10])
+
+print("y: ")
+print(tokenized_sentences[10][1:])
+print(y_label[10])
