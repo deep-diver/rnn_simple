@@ -84,4 +84,33 @@ class RNN:
                                     (hidden_dim, hidden_dim))        
 
     def forward_pass(self, inputs):
-        
+        # The total number of time steps 
+        # (simple vector size)
+        time_steps = len(inputs)
+
+        # During forward propagation we save all hidden states in s because need them later.
+        # We add one additional element for the initial hidden, which we set to 0
+        hidden_state = np.zeros((time_steps + 1, self.hidden_dim))
+        hidden_state[-1] = np.zeros(self.hidden_dim)
+
+        # The outputs at each time step. Again, we save them for later.
+        outputs = np.zeros((time_steps, self.word_dim))
+
+        # For each time step...
+        for time_step in np.arange(time_steps):
+            # each word has unique index (word_to_index) / 
+            # if vocab is "h,e,l,o", then word_to_index['e'] is 1, and one hot encode for 'e' is [0, 1, 0, 0]
+            # matrix multiplication between one hot and U is only U part in word_to_index['e'] row
+            hidden_from_i = self.U[:,inputs[time_step]]
+            hidden_from_h = self.W.dot(hidden_state[time_step-1])   # multiplication between current and previous time state (each memory)           
+            hidden_in = hidden_from_i + hidden_from_h               # combine them
+            hidden_state[time_step] = np.tanh(hidden_in)            # why tanh? for activation function? => the reason will be updated later.
+            
+            outputs_in = self.V.dot(hidden_state[time_step])
+            outputs[time_step] = softmax(output)
+
+        return [outputs, hidden_state]
+
+    
+
+
