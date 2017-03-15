@@ -14,10 +14,10 @@ def get_text_from_file(filename):
         raw = file.read()
     return raw
 
-keep_vocab_freq = 8000
-unknown_token = "UNKNOWN_TOKEN"
-sentence_start_token = "SENTENCE_START"
-sentence_end_token = "SENTENCE_END"
+keep_vocab_freq         = 8000
+unknown_token           = "UNKNOWN_TOKEN"
+sentence_start_token    = "SENTENCE_START"
+sentence_end_token      = "SENTENCE_END"
 
 # get raw text from the file, 'anna.txt'
 raw_text = get_text_from_file('anna.txt')
@@ -51,5 +51,34 @@ for i, sentence in enumerate(tokenized_sentences):
 
 # list[:-1] => exclude the last item
 # list[1:] => exclude the first item
-X_train = np.asarray([[word_to_index[w] for w in sent[:-1]] for sent in tokenized_sentences])
-y_train = np.asarray([[word_to_index[w] for w in sent[1:]] for sent in tokenized_sentences])
+x_train = np.asarray([[word_to_index[w] for w in sent[:-1]] for sent in tokenized_sentences])
+y_label = np.asarray([[word_to_index[w] for w in sent[1:]] for sent in tokenized_sentences])
+
+# 1 sample training and label
+print("x: ")
+print(tokenized_sentences[10][:-1])
+print(x_train[10])
+
+print("y: ")
+print(tokenized_sentences[10][1:])
+print(y_label[10])
+
+class RNN:
+    def _init_(self, input_dim, hidden_dim=100, bptt_truncate=4):
+        self.input_dim      = input_dim
+        self.hidden_dim     = hidden_dim
+        self.bptt_truncate  = bptt_truncate
+
+        # Random initialization of the weights for each layer
+        # numpy.random.uniform(low, high, size)
+        self.U = np.random.uniform(-np.sqrt(1./input_dim), 
+                                    np.sqrt(1./input_dim), 
+                                    (hidden_dim, input_dim))
+
+        self.V = np.random.uniform(-np.sqrt(1./hidden_dim), 
+                                    np.sqrt(1./hidden_dim), 
+                                    (input_dim, hidden_dim))
+
+        self.W = np.random.uniform(-np.sqrt(1./hidden_dim), 
+                                    np.sqrt(1./hidden_dim), 
+                                    (hidden_dim, hidden_dim))        
