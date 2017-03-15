@@ -82,3 +82,6 @@ class RNN:
         self.W = np.random.uniform(-np.sqrt(1./hidden_dim), 
                                     np.sqrt(1./hidden_dim), 
                                     (hidden_dim, hidden_dim))        
+
+    def forward_pass(self, inputs):
+        
