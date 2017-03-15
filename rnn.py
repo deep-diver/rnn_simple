@@ -87,6 +87,22 @@ class RNN:
                                     np.sqrt(1./hidden_dim), 
                                     (hidden_dim, hidden_dim))        
 
+    def calculate_total_loss(self, x, y):
+        L = 0
+        # For each sentence...
+        for i in np.arange(len(y)):
+            o, s = self.forward_propagation(x[i])
+            # We only care about our prediction of the "correct" words
+            correct_word_predictions = o[np.arange(len(y[i])), y[i]]
+            # Add to the loss based on how off we were
+            L += -1 * np.sum(np.log(correct_word_predictions))
+        return L
+    
+    def calculate_loss(self, x, y):
+        # Divide the total loss by the number of training examples
+        N = np.sum((len(y_i) for y_i in y))
+        return self.calculate_total_loss(x, y) / N
+
     def forward_pass(self, inputs):
         # The total number of time steps 
         # (simple vector size)
