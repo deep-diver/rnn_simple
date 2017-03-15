@@ -14,6 +14,10 @@ def get_text_from_file(filename):
         raw = file.read()
     return raw
 
+def softmax(x):
+    score_mat_exp = np.exp(np.asarray(x))
+    return score_mat_exp / score_mat_exp.sum(0)
+
 keep_vocab_freq         = 8000
 unknown_token           = "UNKNOWN_TOKEN"
 sentence_start_token    = "SENTENCE_START"
@@ -55,16 +59,16 @@ x_train = np.asarray([[word_to_index[w] for w in sent[:-1]] for sent in tokenize
 y_label = np.asarray([[word_to_index[w] for w in sent[1:]] for sent in tokenized_sentences])
 
 # 1 sample training and label
-print("x: ")
-print(tokenized_sentences[10][:-1])
-print(x_train[10])
+print("x_train[15] x: ")
+print(tokenized_sentences[15][:-1])
+print(x_train[15])
 
-print("y: ")
-print(tokenized_sentences[10][1:])
-print(y_label[10])
+print("x_train[15] y: ")
+print(tokenized_sentences[15][1:])
+print(y_label[15])
 
 class RNN:
-    def _init_(self, input_dim, hidden_dim=100, bptt_truncate=4):
+    def __init__(self, input_dim, hidden_dim=100, bptt_truncate=4):
         self.input_dim      = input_dim
         self.hidden_dim     = hidden_dim
         self.bptt_truncate  = bptt_truncate
@@ -82,3 +86,49 @@ class RNN:
         self.W = np.random.uniform(-np.sqrt(1./hidden_dim), 
                                     np.sqrt(1./hidden_dim), 
                                     (hidden_dim, hidden_dim))        
+
+    def forward_pass(self, inputs):
+        # The total number of time steps 
+        # (simple vector size)
+        time_steps = len(inputs)
+
+        # During forward propagation we save all hidden states in s because need them later.
+        # We add one additional element for the initial hidden, which we set to 0
+        hidden_state = np.zeros((time_steps + 1, self.hidden_dim))
+        hidden_state[-1] = np.zeros(self.hidden_dim)
+
+        # The outputs at each time step. Again, we save them for later.
+        outputs = np.zeros((time_steps, self.input_dim))
+
+        # For each time step...
+        for time_step in np.arange(time_steps):
+            # each word has unique index (word_to_index) / 
+            # if vocab is "h,e,l,o", then word_to_index['e'] is 1, and one hot encode for 'e' is [0, 1, 0, 0]
+            # matrix multiplication between one hot and U is only U part in word_to_index['e'] row
+            hidden_from_i = self.U[:,inputs[time_step]]
+            hidden_from_h = self.W.dot(hidden_state[time_step-1])   # multiplication between current and previous time state (each memory)           
+            hidden_in = hidden_from_i + hidden_from_h               # combine them
+            hidden_state[time_step] = np.tanh(hidden_in)            # why tanh? for activation function? => the reason will be updated later.
+            
+            outputs_in = self.V.dot(hidden_state[time_step])
+            outputs[time_step] = softmax(outputs_in)
+
+        return [outputs, hidden_state]
+
+    def predict(self, inputs):
+        outputs, hidden_state = self.forward_pass(inputs)
+        return np.argmax(outputs, axis=1)
+
+print("forward & predict testing begins")
+print("forward_pass(x_train[15])")
+np.random.seed(15)
+model = RNN(keep_vocab_freq)
+o, s = model.forward_pass(x_train[15])
+print(o.shape)
+print(o)
+
+print("predict(x_train[15])")
+predictions = model.predict(x_train[15])
+print(predictions.shape)
+print(predictions)
+print("forward & predict testing ends")
